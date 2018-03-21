@@ -1,4 +1,9 @@
 <?
+
+function RemoveWikiLinks($string)
+{    
+    return str_replace(array("[[","]]"),"",$string);
+}
 function MediawikiApiQuery($arg1)
 {
     $url = 'http://www.splitterwiki.de/w/api.php?action=query&titles='.$arg1.'&prop=revisions&rvprop=content&format=json&formatversion=2';
@@ -66,9 +71,10 @@ for ($i = 0; $i < count($teile); $i++) {
     if (strcmp (utf8_encode("BevölkerungText") ,$temp) == 0){
         $var = explode ("=",$teile[$i])[1];
         //remove \n
-        $BevVerteilung = "Verteilung: ";
+        //$BevVerteilung = "Verteilung: ";
         $BevVerteilung .=  substr($var,0,-2);
         $BevVerteilung .= "<br>";
+        $BevVerteilung = RemoveWikiLinks($BevVerteilung);
     }
 }
 //echo "<b>Abenteuer</b><br>";
