@@ -1,8 +1,24 @@
 <?
-
+function isOffical($name)
+{
+    $temp = array_keys(SemanticwikiApiQuery(urlencode($name), 'Offiziell::Ja')["query"]["results"])[0];
+    //If the result of this query is empty, its not offical
+    if ($temp != "")
+    {
+        return True;
+    }
+    else 
+    {
+        return False;
+    }
+}
 function RemoveWikiLinks($string)
 {    
     return str_replace(array("[[","]]"),"",$string);
+}
+function createWikiLink($string)
+{
+    return '<a href="http://www.splitterwiki.de/wiki/'.$string.'">'.$string.'</a>';
 }
 function MediawikiApiQuery($arg1)
 {
@@ -27,7 +43,6 @@ function SemanticwikiApiQuery($arg1, $arg2)
 //arguments coming from the google earth client
 $id= trim(htmlspecialchars($_GET["id"]));
 $target = trim(htmlspecialchars($_GET["target"]));
-
 //First API Query for mediawiki stuff
 $content = MediawikiApiQuery($id);
 //Second API Query this time semantic wiki, for szenarien
@@ -77,15 +92,40 @@ for ($i = 0; $i < count($teile); $i++) {
         $BevVerteilung = RemoveWikiLinks($BevVerteilung);
     }
 }
-//echo "<b>Abenteuer</b><br>";
-for ($i = 0; $i < count($abenteuer); $i++) {
-    //echo $abenteuer[$i];
-    //echo "<br>";
+if (count($abenteuer) != 0)
+{
+$AusgabeAbenteuer ="<br><b>Abenteuer:</b><br>";
 }
-//echo "<b>Szenario</b><br>";
-for ($i = 0; $i < count($szenario); $i++) {
-    //echo $szenario[$i];
-    //echo "<br>";
+for ($i = 0; $i < count($abenteuer); $i++) 
+    {
+    $AusgabeAbenteuer .= createWikiLink($abenteuer[$i]);
+    if (isOffical($abenteuer[$i]) == True)
+        {
+        $AusgabeAbenteuer .= " (Offiziell)";
+        }
+    else 
+        {
+        $AusgabeAbenteuer .= " (Inoffiziell)";
+        }
+    $AusgabeAbenteuer .= "<br>";
+    }
+
+if (count($szenario) != 0)
+    {
+        $AusgabeSzenario ="<br><b>Szenario:</b><br>";
+    }
+for ($i = 0; $i < count($szenario); $i++) 
+    {
+        $AusgabeSzenario .= createWikiLink($szenario[$i]);
+        if (isOffical($szenario[$i]) == True)
+        {
+            $AusgabeSzenario .= " (Offiziell)";
+        }
+        else
+        {
+            $AusgabeSzenario .= " (Inoffiziell)";
+        }
+        $AusgabeSzenario .= "<br>";
 }
 //Output
 header('Content-type: application/vnd.google-earth.kml+xml');
@@ -102,6 +142,8 @@ echo "<";
         <description><![CDATA[
         <?=$BevAnzahl?>
         <?=$BevVerteilung?>
+        <?=$AusgabeAbenteuer?>
+        <?=$AusgabeSzenario?>
 		]]></description>
     </Placemark>
    </Change>
